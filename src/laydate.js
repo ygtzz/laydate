@@ -10,65 +10,11 @@
 ;!function(){
   "use strict";
 
-  var isLayui = window.layui && layui.define, ready = {
-    getPath: function(){
-      var jsPath = document.currentScript ? document.currentScript.src : function(){
-        var js = document.scripts
-        ,last = js.length - 1
-        ,src;
-        for(var i = last; i > 0; i--){
-          if(js[i].readyState === 'interactive'){
-            src = js[i].src;
-            break;
-          }
-        }
-        return src || js[last].src;
-      }();
-      return jsPath.substring(0, jsPath.lastIndexOf('/') + 1);
-    }()
-    
-    //获取节点的style属性值
-    ,getStyle: function(node, name){
-      var style = node.currentStyle ? node.currentStyle : window.getComputedStyle(node, null);
-      return style[style.getPropertyValue ? 'getPropertyValue' : 'getAttribute'](name);
-    }
-    
-    //载入CSS配件
-    ,link: function(href, fn, cssname){
-      
-      //未设置路径，则不主动加载css
-      if(!laydate.path) return;
-      
-      var head = document.getElementsByTagName("head")[0], link = document.createElement('link');
-      if(typeof fn === 'string') cssname = fn;
-      var app = (cssname || href).replace(/\.|\//g, '');
-      var id = 'layuicss-'+ app, timeout = 0;
-      
-      link.rel = 'stylesheet';
-      link.href = laydate.path + href;
-      link.id = id;
-      
-      if(!document.getElementById(id)){
-        head.appendChild(link);
-      }
-      
-      if(typeof fn !== 'function') return;
-      
-      //轮询css是否加载完毕
-      (function poll() { 
-        if(++timeout > 8 * 1000 / 100){
-          return window.console && console.error('laydate.css: Invalid');
-        };
-        parseInt(ready.getStyle(document.getElementById(id), 'width')) === 1989 ? fn() : setTimeout(poll, 100);
-      }());
-    }
-  }
-
-  ,laydate = {
+  var laydate = {
     v: '5.0.9'
     ,config: {} //全局配置项
     ,index: (window.laydate && window.laydate.v) ? 100000 : 0
-    ,path: ready.getPath
+    // ,path: ready.getPath
     
     //设置全局项
     ,set: function(options){
@@ -76,14 +22,7 @@
       that.config = lay.extend({}, that.config, options);
       return that;
     }
-    
-    //主体CSS等待事件
-    ,ready: function(fn){
-      var cssname = 'laydate', ver = ''
-      ,path = (isLayui ? 'modules/laydate/' : 'theme/') + 'default/laydate.css?v='+ laydate.v + ver;
-      isLayui ? layui.addcss(path, fn, cssname) : ready.link(path, fn, cssname);
-      return this;
-    }
+
   }
   
   //操作当前实例
@@ -108,9 +47,7 @@
     var that = this;
     that.index = ++laydate.index;
     that.config = lay.extend({}, that.config, laydate.config, options);
-    laydate.ready(function(){
-      that.init();
-    });
+    that.init();
   }
   
   //DOM查找
@@ -604,13 +541,13 @@
         var elem = lay.elem('i', {
           'class': 'layui-icon laydate-icon laydate-prev-y'
         });
-        elem.innerHTML = '&#xe65a;';
+        elem.innerHTML = '«';
         return elem;
       }(), function(){ //上一月
         var elem = lay.elem('i', {
           'class': 'layui-icon laydate-icon laydate-prev-m'
         });
-        elem.innerHTML = '&#xe603;';
+        elem.innerHTML = '‹';
         return elem;
       }(), function(){ //年月选择
         var elem = lay.elem('div', {
@@ -623,13 +560,13 @@
         var elem = lay.elem('i', {
           'class': 'layui-icon laydate-icon laydate-next-m'
         });
-        elem.innerHTML = '&#xe602;';
+        elem.innerHTML = '›';
         return elem;
       }(), function(){ //下一年
         var elem = lay.elem('i', {
           'class': 'layui-icon laydate-icon laydate-next-y'
         });
-        elem.innerHTML = '&#xe65b;';
+        elem.innerHTML = '»';
         return elem;
       }()]
       
@@ -1847,20 +1784,12 @@
   //暴露lay
   window.lay = window.lay || lay;
   
-  //加载方式
-  isLayui ? (
-    laydate.ready()
-    ,layui.define(function(exports){ //layui加载
-      laydate.path = layui.cache.dir;
-      exports(MOD_NAME, laydate);
-    })
-  ) : (
-    (typeof define === 'function' && define.amd) ? define(function(){ //requirejs加载
-      return laydate;
-    }) : function(){ //普通script标签加载
-      laydate.ready();
-      window.laydate = laydate
-    }()
-  );
 
+  //加载方式
+  (typeof define === 'function' && define.amd) ? define(function(){ //requirejs加载
+    return laydate;
+  }) : function(){ //普通script标签加载
+    window.laydate = laydate
+  }()
+  
 }();
